@@ -1,12 +1,22 @@
 package com.example.myapplication4
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.ContentValues.TAG
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ListView
-import android.widget.TextView
+import android.util.Log
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.example.myapplication4.R
+import okhttp3.*
+import org.json.JSONArray
+import org.json.JSONException
 
 
 class MainActivity : AppCompatActivity() {
@@ -19,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 //        arrayAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, users)
 //        mListView.adapter = arrayAdapter
 
-        var mListView = findViewById<ListView>(R.id.mainlist)
+//        var mListView = findViewById<ListView>(R.id.mainlist)
         val itemList = mutableListOf<String>()
         var k = 0
 
@@ -115,18 +125,56 @@ class MainActivity : AppCompatActivity() {
             Pair("Health Tips : శరీరంలోని ఈ అవయవాలను పోలి ఉన్న పండ్లను తింటే.. ఎన్నో రకాల ఆరోగ్య సమస్యలు దూరం..", "https://telugunewsadda.com/wp-content/uploads/2023/02/IMG_20230212_231704-150x150.jpg"),
             Pair("Heart Attack And Peanuts:గుండెపోటుకి పల్లీలకి గల సంబంధం ఏమిటి? మైండ్ బ్లాక్ అయ్యే వాస్తవాలు..", "https://telugunewsadda.com/wp-content/uploads/2023/02/IMG_20230212_191323-150x150.jpg"),
             Pair("Mahashivratri:మహా శివరాత్రి రోజు చేయాల్సిన చేయకూడని పనులు ఇవే..", "https://telugunewsadda.com/wp-content/uploads/2023/02/IMG_20230212_173355-150x150.jpg"),
-            Pair("Viral news: వామ్మో ఆమెంది సామీ అలా దూకేసింది..చీర కట్టులో..వీడియో వైరల్..", "https://telugunewsadda.com/wp-content/uploads/2023/02/IMG_20230211_180416-150x150.jpg"),
-
+            Pair("Viral news: వామ్మో ఆమెంది సామీ అలా దూకేసింది..చీర కట్టులో..వీడియో వైరల్..", "https://telugunewsadda.com/wp-content/uploads/2023/02/IMG_20230211_180416-150x150.jpg")
             )
 
-        val listView = findViewById<ListView>(R.id.mainlist)
-        val adapter = MyListAdapter(this, items)
-        listView.adapter = adapter
+        val queue = Volley.newRequestQueue(this)
+        val url = "https://telugunewsadda.com/wp-json/wp/v2/posts?per_page=10"
+
+        val recyclerView = findViewById<RecyclerView>(R.id.newRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val jsonArrayRequest = JsonArrayRequest(
+            Request.Method.GET, url,
+            null,
+            Response.Listener { response ->
+                // Handle the response
+                try {
+                    val listItems = mutableListOf<Post>()
+                    // Iterate through the JSON array
+                    for (i in 0 until response.length()) {
+                        val jsonObject = response.getJSONObject(i)
+                        val id = jsonObject.getInt("id")
+                        val title = jsonObject.getJSONObject("title").getString("rendered")
+                        val thumb = jsonObject.getString("featured_media_src_url")
+                        listItems.add(Post(id, title,thumb))
+                    }
+                    val postRecyclerView = findViewById<RecyclerView>(R.id.newRecyclerView)
+                    val postAdapter = PostListAdapter(listItems)
+                    postRecyclerView.adapter = postAdapter
+                    Toast.makeText(this, "You clicked", Toast.LENGTH_LONG).show()
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    Toast.makeText(this, "No clicked", Toast.LENGTH_LONG).show()
+                }
+            },
+            Response.ErrorListener { error ->
+                // Handle the error
+                error.printStackTrace()
+            }
+        )
+
+// Add the request to the RequestQueue.
+        queue.add(jsonArrayRequest)
+
+
+//        val listView = findViewById<ListView>(R.id.mainlist)
+//        val adapter = MyListAdapter(this, items)
+//        listView.adapter = adapter
 
 
 
 
-//        val adapter = ArrayAdapter(this, R.layout.list_item, listItems)
 
     }
 }

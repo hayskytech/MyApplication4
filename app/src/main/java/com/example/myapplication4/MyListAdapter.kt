@@ -25,7 +25,7 @@ class MyListAdapter(context: Context, private val items: List<Pair<String, Strin
 
         val imageView = view?.findViewById<ImageView>(R.id.thumb)
         Picasso.get().load(item.second).into(imageView)
-
+        
         return view!!
     }
 }
