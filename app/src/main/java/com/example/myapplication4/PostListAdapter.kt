@@ -34,6 +34,7 @@ class PostListAdapter(private val posts: List<Post>) : RecyclerView.Adapter<Post
             val intent = Intent(it.context, PostView::class.java)
             intent.putExtra("thumb",post.thumb)
             intent.putExtra("title",post.title)
+            intent.putExtra("content",post.content)
             holder.itemView.context.startActivity(intent)
         }
 
