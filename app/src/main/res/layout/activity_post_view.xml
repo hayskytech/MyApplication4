@@ -19,10 +19,10 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="250dp"
             android:maxHeight="300dp"
             android:id="@+id/post_thumb"
-            android:src="@mipmap/ic_launcher"
-            />
+            android:src="@mipmap/ic_launcher" />
 
 
         <TextView

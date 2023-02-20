@@ -14,11 +14,11 @@ class PostView : AppCompatActivity() {
         setContentView(R.layout.activity_post_view)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
+        title = "Back to Home"
         val post_title = findViewById<TextView>(R.id.post_title)
         val post_content = findViewById<TextView>(R.id.post_content)
         val post_thumb = findViewById<ImageView>(R.id.post_thumb)
-        post_title.text = intent.getStringExtra("title")
+        post_title.text = Html.fromHtml(intent.getStringExtra("title"),Html.FROM_HTML_MODE_LEGACY)
         post_content.text = Html.fromHtml( intent.getStringExtra("content"),Html.FROM_HTML_MODE_LEGACY)
 
         val img = intent.getStringExtra("thumb")

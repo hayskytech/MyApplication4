@@ -1,12 +1,16 @@
 package com.example.myapplication4
 
+import android.Manifest
 import android.content.ContentValues.TAG
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Request
@@ -29,9 +33,33 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         val progressBar = findViewById<ProgressBar>(R.id.progressBar)
         progressBar.visibility = View.VISIBLE
-        val queue = Volley.newRequestQueue(this)
-        val url = "https://telugunewsadda.com/wp-json/wp/v2/posts?per_page=10"
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Internet available", Toast.LENGTH_LONG).show()
+            tech()
+        } else {
+            Toast.makeText(this, "Internet not available", Toast.LENGTH_LONG).show()
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.INTERNET), 1)
+        }
 
+    }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            1 -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    recreate()
+                } else {
+                    Toast.makeText(this, "Permission not granted", Toast.LENGTH_LONG).show()
+                }
+                return
+            }
+        }
+    }
+
+
+    fun tech(){
+        val queue = Volley.newRequestQueue(this)
+        val url = "https://telugunewsadda.com/wp-json/wp/v2/posts?_fields=id,title,content,jetpack_featured_media_url&per_page=20"
         val jsonArrayRequest = JsonArrayRequest(
             Request.Method.GET, url,
             null,
@@ -45,14 +73,15 @@ class MainActivity : AppCompatActivity() {
                         val id = jsonObject.getInt("id")
                         val title = jsonObject.getJSONObject("title").getString("rendered")
                         val content = jsonObject.getJSONObject("content").getString("rendered")
-                        val thumb = jsonObject.getString("featured_media_src_url")
+                        val thumb = jsonObject.getString("jetpack_featured_media_url")
                         listItems.add(Post(id, title,thumb,content))
                     }
                     val postRecyclerView = findViewById<RecyclerView>(R.id.newRecyclerView)
                     val postAdapter = PostListAdapter(listItems)
                     postRecyclerView.adapter = postAdapter
 //                    Toast.makeText(this, "You clicked", Toast.LENGTH_LONG).show()
-                    progressBar.visibility = View.GONE
+                    val progressBar1 = findViewById<ProgressBar>(R.id.progressBar)
+                    progressBar1.visibility = View.GONE
 
                 } catch (e: JSONException) {
                     e.printStackTrace()
@@ -64,8 +93,6 @@ class MainActivity : AppCompatActivity() {
                 error.printStackTrace()
             }
         )
-
         queue.add(jsonArrayRequest)
     }
-
 }
